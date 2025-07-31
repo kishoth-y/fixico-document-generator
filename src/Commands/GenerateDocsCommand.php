@@ -44,29 +44,29 @@ class GenerateDocsCommand extends Command
      */
     public function handle()
     {
-        $apiProvider = $this->option('api-provider') ?: config('docudoodle.default_api_provider', 'openai');
+        $apiProvider = $this->option('api-provider') ?: config('document-generator.default_api_provider', 'openai');
         $apiKey = '';
 
         if ($apiProvider === 'openai') {
-            $apiKey = config('docudoodle.openai_api_key');
+            $apiKey = config('document-generator.openai_api_key');
             if (empty($apiKey)) {
                 $this->error('Oops! OpenAI API key is not set in the configuration!');
                 return 1;
             }
         } elseif ($apiProvider === 'claude') {
-            $apiKey = config('docudoodle.claude_api_key');
+            $apiKey = config('document-generator.claude_api_key');
             if (empty($apiKey)) {
                 $this->error('Oops! Claude API key is not set in the configuration!');
                 return 1;
             }
         } elseif ($apiProvider === 'gemini') {
-            $apiKey = config('docudoodle.gemini_api_key');
+            $apiKey = config('document-generator.gemini_api_key');
             if (empty($apiKey)) {
                 $this->error('Oops! Gemini API key is not set in the configuration!');
                 return 1;
             }
         } elseif ($apiProvider === 'azure') {
-            $apiKey = config('docudoodle.azure_api_key');
+            $apiKey = config('document-generator.azure_api_key');
             if (empty($apiKey)) {
                 $this->error('Oops! Azure OpenAI API key is not set in the configuration!');
                 return 1;
@@ -76,38 +76,38 @@ class GenerateDocsCommand extends Command
         // Parse command options with config fallbacks
         $sourceDirs = $this->option('source');
         if (empty($sourceDirs)) {
-            $sourceDirs = config('docudoodle.source_dirs', ['app/', 'config/', 'routes/', 'database/']);
+            $sourceDirs = config('document-generator.source_dirs', ['app/', 'config/', 'routes/', 'database/']);
         }
 
         $outputDir = $this->option('output');
         if (empty($outputDir)) {
-            $outputDir = config('docudoodle.output_dir', 'documentation');
+            $outputDir = config('document-generator.output_dir', 'documentation');
         }
 
         $model = $this->option('model');
         if (empty($model)) {
-            $model = config('docudoodle.default_model', 'gpt-4o-mini');
+            $model = config('document-generator.default_model', 'gpt-4o-mini');
         }
 
         $maxTokens = $this->option('max-tokens');
         if (empty($maxTokens)) {
-            $maxTokens = (int) config('docudoodle.max_tokens', 10000);
+            $maxTokens = (int) config('document-generator.max_tokens', 10000);
         } else {
             $maxTokens = (int) $maxTokens;
         }
 
         $extensions = $this->option('extensions');
         if (empty($extensions)) {
-            $extensions = config('docudoodle.extensions', ['php', 'yaml', 'yml']);
+            $extensions = config('document-generator.extensions', ['php', 'yaml', 'yml']);
         }
 
         $skipSubdirs = $this->option('skip');
         if (empty($skipSubdirs)) {
-            $skipSubdirs = config('docudoodle.default_skip_dirs', ['vendor/', 'node_modules/', 'tests/', 'cache/']);
+            $skipSubdirs = config('document-generator.default_skip_dirs', ['vendor/', 'node_modules/', 'tests/', 'cache/']);
         }
 
-        $ollamaHost = config('docudoodle.ollama_host', 'localhost');
-        $ollamaPort = config('docudoodle.ollama_port', 5000);
+        $ollamaHost = config('document-generator.ollama_host', 'localhost');
+        $ollamaPort = config('document-generator.ollama_port', 5000);
 
         
         // Azure OpenAI specific configuration
@@ -116,13 +116,13 @@ class GenerateDocsCommand extends Command
         $azureApiVersion = $this->option('azure-api-version');
         
         if (empty($azureEndpoint)) {
-            $azureEndpoint = config('docudoodle.azure_endpoint', '');
+            $azureEndpoint = config('document-generator.azure_endpoint', '');
         }
         if (empty($azureDeployment)) {
-            $azureDeployment = config('docudoodle.azure_deployment', '');
+            $azureDeployment = config('document-generator.azure_deployment', '');
         }
         if (empty($azureApiVersion)) {
-            $azureApiVersion = config('docudoodle.azure_api_version', '2023-05-15');
+            $azureApiVersion = config('document-generator.azure_api_version', '2023-05-15');
         }
         
 
@@ -131,11 +131,11 @@ class GenerateDocsCommand extends Command
         if ($this->option('jira')) {
             $jiraConfig = [
                 'enabled' => true,
-                'host' => config('docudoodle.jira.host'),
-                'api_token' => config('docudoodle.jira.api_token'),
-                'email' => config('docudoodle.jira.email'),
-                'project_key' => config('docudoodle.jira.project_key'),
-                'issue_type' => config('docudoodle.jira.issue_type'),
+                'host' => config('document-generator.jira.host'),
+                'api_token' => config('document-generator.jira.api_token'),
+                'email' => config('document-generator.jira.email'),
+                'project_key' => config('document-generator.jira.project_key'),
+                'issue_type' => config('document-generator.jira.issue_type'),
             ];
 
             // Validate Jira configuration
@@ -151,11 +151,11 @@ class GenerateDocsCommand extends Command
         if ($this->option('confluence')) {
             $confluenceConfig = [
                 'enabled' => true,
-                'host' => config('docudoodle.confluence.host'),
-                'api_token' => config('docudoodle.confluence.api_token'),
-                'email' => config('docudoodle.confluence.email'),
-                'space_key' => config('docudoodle.confluence.space_key'),
-                'parent_page_id' => config('docudoodle.confluence.parent_page_id'),
+                'host' => config('document-generator.confluence.host'),
+                'api_token' => config('document-generator.confluence.api_token'),
+                'email' => config('document-generator.confluence.email'),
+                'space_key' => config('document-generator.confluence.space_key'),
+                'parent_page_id' => config('document-generator.confluence.parent_page_id'),
             ];
 
             // Validate Confluence configuration
@@ -184,12 +184,12 @@ class GenerateDocsCommand extends Command
         $this->info('API provider: ' . $apiProvider);
 
         // Determine cache settings
-        $useCache = !$this->option('no-cache') && config('docudoodle.use_cache', true);
+        $useCache = !$this->option('no-cache') && config('document-generator.use_cache', true);
         $bypassCache = $this->option('bypass-cache');
 
         $cachePath = $this->option('cache-path');
         if (empty($cachePath)) {
-            $cachePath = config('docudoodle.cache_file_path', null);
+            $cachePath = config('document-generator.cache_file_path', null);
         } 
         if ($useCache) {
             $this->info('Cache enabled.' . ($cachePath ? " Path: {$cachePath}" : ' Using default path'));
@@ -202,7 +202,7 @@ class GenerateDocsCommand extends Command
 
         $promptTemplate = $this->option('prompt-template');
         if (empty($promptTemplate)) {
-            $promptTemplate = config('docudoodle.prompt_template', __DIR__.'/../../resources/templates/default-prompt.md');
+            $promptTemplate = config('document-generator.prompt_template', __DIR__.'/../../resources/templates/default-prompt.md');
         }
 
         try {

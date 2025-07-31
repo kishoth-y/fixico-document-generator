@@ -20,7 +20,7 @@ class DocudoodleServiceProvider extends ServiceProvider
             ]);
             
             $this->publishes([
-                __DIR__.'/../config/docudoodle.php' => config_path('docudoodle.php'),
+                __DIR__ . '/../config/document-generator.php' => config_path('document-generator.php'),
             ], 'docudoodle-config');
         }
     }
@@ -33,7 +33,7 @@ class DocudoodleServiceProvider extends ServiceProvider
     public function register()
     {
         $this->mergeConfigFrom(
-            __DIR__.'/../config/docudoodle.php', 'docudoodle'
+            __DIR__ . '/../config/document-generator.php', 'document-generator'
         );
     }
 }
