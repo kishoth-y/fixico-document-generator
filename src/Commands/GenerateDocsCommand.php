@@ -12,7 +12,7 @@ class GenerateDocsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'docudoodle:generate 
+    protected $signature = 'document:generate 
                             {--source=* : Directories to process (default: from config or app/, config/, routes/, database/)}
                             {--output= : Output directory for documentation (default: from config or "documentation")}
                             {--model= : Model to use (default: from config or gpt-4o-mini)}
