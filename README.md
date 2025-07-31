@@ -7,4 +7,5 @@
 ## Installation
 
 > composer require kishoth-y/fixico-document-generator
+
 > publish the config
