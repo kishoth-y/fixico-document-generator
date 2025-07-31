@@ -2,4 +2,9 @@
 
 # Fixico Document Generator
 
-We can use this to generate documentation using AI
+>We can use this to generate documentation with the help of AI.
+
+## Installation
+
+> composer require kishoth-y/fixico-document-generator
+> publish the config
